@@ -7,7 +7,6 @@ using OnlinePharmacy.DTOs;
 using OnlinePharmacy.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using OnlinePharmacy.Helpers;
 using OnlinePharmacy.Extensions;
@@ -26,19 +25,13 @@ namespace OnlinePharmacy.Controllers
         private readonly IConfiguration configuration;
         public readonly DBConn _context;
         public readonly RoleManager<IdentityRole> roleManager;
-        private readonly IUserRepository _userRepository;
-        private readonly ITokenService _tokenService;
-        private readonly IPasswordHasher _passwordHasher;
 
-        public AccountController(UserManager<AppUser> userManager, IConfiguration configuration, DBConn context, RoleManager<IdentityRole> roleManager, ITokenService tokenService, IPasswordHasher passwordHasher, IUserRepository userRepository)
+        public AccountController(UserManager<AppUser> userManager, IConfiguration configuration, DBConn context, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             this.roleManager = roleManager;
             this.configuration = configuration;
             _context = context;
-            _userRepository = userRepository;
-            _tokenService = tokenService;
-            _passwordHasher = passwordHasher;
         }
 
         [HttpPost]
@@ -108,16 +101,15 @@ namespace OnlinePharmacy.Controllers
         {
             if (ModelState.IsValid)
             {
-                var decryptedEmail = TripleDesEncryptionHelper.Decrypt(login.Email);
-                var decryptedPassword = TripleDesEncryptionHelper.Decrypt(login.Password);
 
-                AppUser? user = await _userManager.FindByEmailAsync(decryptedEmail);
+
+                AppUser? user = await _userManager.FindByEmailAsync(login.email);
                 if (user != null)
                 {
-                    if (await _userManager.CheckPasswordAsync(user, decryptedPassword))
+                    if (await _userManager.CheckPasswordAsync(user, login.password))
                     {
                         // Generate and return JWT token
-                        var claims = new List<Claim>();
+                        var claims = new List<Claim>(); 
 
                         var userRoles = await _userManager.GetRolesAsync(user);
                         claims.Add(new Claim(ClaimTypes.Name, user.Email));
@@ -239,5 +231,24 @@ namespace OnlinePharmacy.Controllers
             }
             return BadRequest(ModelState);
         }
+
+        [HttpGet("GetUserDetails")]
+        public async Task<IActionResult> GetUserDetails(string userId)
+        {
+
+            var user = await _context.Patients.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user != null)
+            {
+                user.FirstName = TripleDesEncryptionHelper.Decrypt(user.FirstName);
+                user.LastName = TripleDesEncryptionHelper.Decrypt(user.LastName);
+                return Ok(user);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
     }
+
 }

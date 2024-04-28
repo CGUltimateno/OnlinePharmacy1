@@ -1,15 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace OnlinePharmacy.DTOs
+public class LoginDTO
 {
-    public class LoginDTO
-    {
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
+    [Required]
+    public string email { get; set; }
 
-        [Required]
-        [DataType(DataType.Password)]
-        public string Password { get; set; }
-    }
+    [Required]
+    [DataType(DataType.Password)]
+    public string password { get; set; }
 }

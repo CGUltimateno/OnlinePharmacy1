@@ -17,7 +17,16 @@ builder.Services.AddDbContext<DBConn>(options => options.UseSqlServer
 builder.Services.AddAuthorization();
 
 builder.Services.AddControllers().AddNewtonsoftJson();
-builder.Services.AddIdentity<AppUser , IdentityRole>().AddEntityFrameworkStores<DBConn>();
+builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
+{
+    // Password settings
+    options.Password.RequireDigit = false;
+    options.Password.RequiredLength = 0;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
+})
+.AddEntityFrameworkStores<DBConn>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -48,13 +57,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
- app.UseAuthentication();
-
 app.UseCors(builder => builder
     .AllowAnyOrigin()
     .AllowAnyMethod()
     .AllowAnyHeader());
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

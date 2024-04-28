@@ -29,13 +29,9 @@ function Login() {
     const handleLogin = async (event) => {
         event.preventDefault();
 
-        const key = 'VptzbIEE5yXFHR0kSe3lN1s='; // Use the same key as in the backend
-        const encryptedEmail = CryptoJS.TripleDES.encrypt(email, key).toString();
-        const encryptedPassword = CryptoJS.TripleDES.encrypt(password, key).toString();
-
         const formData = new FormData();
-        formData.append('email', encryptedEmail);
-        formData.append('password', encryptedPassword);
+        formData.append('email', email);
+        formData.append('password', password);
 
         try {
             const response = await axios.post("http://localhost:5209/api/Account/Login", formData);

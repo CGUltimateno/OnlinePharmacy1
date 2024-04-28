@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import styles from './Register.module.css'; // Import CSS module
 
 function RegisterAdmin() {
     const [username, setUsername] = useState("");
@@ -14,7 +15,7 @@ function RegisterAdmin() {
     const [phoneNumber, setPhoneNumber] = useState("");
     const [dateOfBirth, setDateOfBirth] = useState("");
 
-    const history = useNavigate();
+    const navigate = useNavigate();
 
     const handleRegister = async (event) => {
         event.preventDefault();
@@ -34,61 +35,36 @@ function RegisterAdmin() {
 
         try {
             const response = await axios.post('http://localhost:5209/api/Account/RegisterAdmin', formData);
-            let message = response.data.Message;
-            if (!message) {
-                message = JSON.parse(response.data).Message;
-            }
-            if (message === "Registered successfully!") {
-                history.push('/login');
-            } else {
+            console.log('Response:', response); // Log the response received from the server
+            if (response && response.data) {
+                let message = response.data.Message;
                 setRegisterStatus(message);
+            } else {
+                throw new Error('No response from server');
             }
         } catch (error) {
-            setRegisterStatus(error.response.data.Message);
+            console.error('Error:', error); // Log any errors that occur
+            setRegisterStatus(error.message);
+        } finally {
+            console.log('Redirecting...'); // Log that redirection is happening
+            navigate('/'); // Redirect to login page
         }
     }
-
+        
     return (
-        <div>
-            <h1>Register Admin</h1>
-            <form onSubmit={handleRegister}>
-                <label>
-                    Username:
-                    <input type="text" value={username} onChange={e => setUsername(e.target.value)} />
-                </label>
-                <label>
-                    Password:
-                    <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
-                </label>
-                <label>
-                    Confirm Password:
-                    <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
-                </label>
-                <label>
-                    Email:
-                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} />
-                </label>
-                <label>
-                    First Name:
-                    <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} />
-                </label>
-                <label>
-                    Last Name:
-                    <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} />
-                </label>
-                <label>
-                    Address:
-                <input type="text" value={address} onChange={e => setAddress(e.target.value)} />
-                </label>
-                <label>
-                    Phone Number:
-                    <input type="text" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} />
-                </label>
-                <label>
-                    Date of Birth:
-                    <input type="text" value={dateOfBirth} onChange={e => setDateOfBirth(e.target.value)} />
-                </label>
-                <input type="submit" value="Submit" />
+        <div className={styles.container}>
+            <form onSubmit={handleRegister} className={styles.form}>
+                <h2 className={styles.title}>Register Admin</h2>
+                <input type="text" value={username} onChange={e => setUsername(e.target.value)} placeholder="Username" className={styles.input} />
+                <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" className={styles.input} />
+                <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirm Password" className={styles.input} />
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" className={styles.input} />
+                <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="First Name" className={styles.input} />
+                <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Last Name" className={styles.input} />
+                <input type="text" value={address} onChange={e => setAddress(e.target.value)} placeholder="Address" className={styles.input} />
+                <input type="text" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} placeholder="Phone Number" className={styles.input} />
+                <input type="text" value={dateOfBirth} onChange={e => setDateOfBirth(e.target.value)} placeholder="Date of Birth" className={styles.input} />
+                <button type="submit" className={styles.button}>Submit</button>
             </form>
             <p>{registerStatus}</p>
         </div>

@@ -57,10 +57,6 @@ function Register() {
                 <input name="username" onChange={handleChange} placeholder="Username" className={styles.input} />
                 <input name="email" onChange={handleChange} placeholder="Email" className={styles.input} />
                 <input name="password" onChange={handleChange} placeholder="Password" type="password" className={styles.input} />
-                <select name="role" onChange={handleChange} className={styles.select}>
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                </select>
                 <button type="submit" className={styles.button}>Register</button>
             </form>
         </div>
