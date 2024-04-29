@@ -102,7 +102,7 @@ namespace OnlinePharmacy.Controllers.Admin
             var patient = _context.Patients.Find(id);
             if (patient== null)
             {
-                return NotFound($"Product not found with {id} ");
+                return NotFound($"Patient not found with {id} ");
             }
             _context.Patients.Remove(patient);
             _context.SaveChanges();

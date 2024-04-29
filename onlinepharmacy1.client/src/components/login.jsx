@@ -1,30 +1,13 @@
 import { useState } from 'react';
 import axios from 'axios';
-import CryptoJS from 'crypto-js';
-
-function base64UrlDecode(str) {
-    str = str.replace(/-/g, '+').replace(/_/g, '/');
-    while (str.length % 4) {
-        str += '=';
-    }
-    return decodeURIComponent(atob(str).split('').map(function (c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-}
-
-function jwtDecode(token) {
-    var parts = token.split('.');
-    if (parts.length !== 3) {
-        throw new Error('JWT must have 3 parts');
-    }
-    var decoded = base64UrlDecode(parts[1]);
-    return JSON.parse(decoded);
-}
+import { useNavigate } from 'react-router-dom';
+import jwtDecode from 'jwt-decode'; // Import decode function directly
 
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loginStatus, setLoginStatus] = useState('');
+    const navigate = useNavigate();
 
     const handleLogin = async (event) => {
         event.preventDefault();
@@ -35,30 +18,30 @@ function Login() {
 
         try {
             const response = await axios.post("http://localhost:5209/api/Account/Login", formData);
-
+        
             if (response.status === 200) {
                 localStorage.setItem('token', response.data.token);
+                localStorage.setItem('userId', response.data.userId);
                 setLoginStatus('Login successful');
-
+        
                 // Decode the token and check the user's role
-                const decodedToken = jwtDecode(response.data.token);
+                const decodedToken = jwtDecode(response.data.token); // Use jwtDecode to decode the token
                 const userRole = decodedToken.role;
-
+        
                 // Redirect the user based on their role
                 if (userRole === 'Admin') {
-                    window.location.href = '/admin'; // Redirect to admin page
+                    navigate('/admin');
                 } else {
-                    window.location.href = '/home'; // Redirect to home page
+                    navigate('/home');
                 }
             } else {
                 throw new Error('Login failed');
-            }
+            } 
         } catch (error) {
             setLoginStatus('Login failed');
             console.error('Error:', error);
         }
-    }
-
+    }; 
 
     return (
         <div>
@@ -76,10 +59,8 @@ function Login() {
             </form>
             <button onClick={() => window.location.href = '/register'}>Register</button>
             <button onClick={() => window.location.href = '/registerAdmin'}>Register for Admin</button>
-
             <p>{loginStatus}</p>
         </div>
-
     );
 }
 

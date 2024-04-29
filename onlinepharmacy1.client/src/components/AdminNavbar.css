@@ -1,0 +1,29 @@
+.admin-navbar {
+  background-color: #333;
+  padding: 10px;
+}
+
+.admin-navbar ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.admin-navbar li {
+  display: inline;
+  margin-right: 20px;
+}
+
+.admin-navbar li a {
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.admin-navbar li a:hover {
+  color: #ffa500; /* Change to desired hover color */
+}
+
+.admin-navbar li.active a {
+  font-weight: bold;
+}
