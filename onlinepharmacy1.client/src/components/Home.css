@@ -1,0 +1,15 @@
+.home-container {
+  /* Add your desired styles here */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.user-info-container {
+  /* Add styles for user info section */
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 20px;
+}

@@ -40,7 +40,7 @@ namespace OnlinePharmacy.Controllers
             if (ModelState.IsValid)
             {
 
-                var encryptedEmail = TripleDesEncryptionHelper.Encrypt(user.Email);
+                
 
                 AppUser appUser = new()
                 {
@@ -136,7 +136,8 @@ namespace OnlinePharmacy.Controllers
                         {
                             token = new JwtSecurityTokenHandler().WriteToken(token),
                             expiration = token.ValidTo,
-                            role = userRoles.Count > 0 ? userRoles[0] : "No roles"
+                            role = userRoles.Count > 0 ? userRoles[0] : "No roles",
+                             userId = user.Id
                         };
 
                         return Ok(_token);
@@ -167,7 +168,7 @@ namespace OnlinePharmacy.Controllers
                 {
                     return BadRequest(new { Message = "A user with this username already exists." });
                 }
-                var encryptedEmail = TripleDesEncryptionHelper.Encrypt(user.Email);
+                
 
                 AppUser appUser = new()
                 {
@@ -179,17 +180,16 @@ namespace OnlinePharmacy.Controllers
                 IdentityResult result = await _userManager.CreateAsync(appUser, user.Password);
 
                 if (!await roleManager.RoleExistsAsync(UserRoles.Admin))
-                    await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
-
-                if (!await roleManager.RoleExistsAsync(UserRoles.User))
-                    await roleManager.CreateAsync(new IdentityRole(UserRoles.User));
-
-                if (!await roleManager.RoleExistsAsync(UserRoles.Admin))
                 {
-                    await _userManager.AddToRoleAsync(appUser, UserRoles.Admin);
+                    await roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
                 }
+
                 if (result.Succeeded)
                 {
+                    if (!await _userManager.IsInRoleAsync(appUser, UserRoles.Admin))
+                    {
+                        await _userManager.AddToRoleAsync(appUser, UserRoles.Admin);
+                    }
                     var encryptedFirstName = TripleDesEncryptionHelper.Encrypt(user.FirstName);
                     var encryptedLastName = TripleDesEncryptionHelper.Encrypt(user.LastName);
 
@@ -231,16 +231,24 @@ namespace OnlinePharmacy.Controllers
             }
             return BadRequest(ModelState);
         }
-
+        [Authorize]
         [HttpGet("GetUserDetails")]
-        public async Task<IActionResult> GetUserDetails(string userId)
+        public async Task<IActionResult> GetUserDetails()
         {
+
+            // Retrieve user ID from the current JWT claim
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return BadRequest("Missing or invalid user ID in JWT token.");
+            }
 
             var user = await _context.Patients.FirstOrDefaultAsync(u => u.UserId == userId);
             if (user != null)
             {
                 user.FirstName = TripleDesEncryptionHelper.Decrypt(user.FirstName);
                 user.LastName = TripleDesEncryptionHelper.Decrypt(user.LastName);
+                user.PhoneNumber = TripleDesEncryptionHelper.Decrypt(user.PhoneNumber);
                 return Ok(user);
             }
             else
